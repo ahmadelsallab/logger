@@ -1,4 +1,4 @@
-Name,Purpose,Description,Run file,Commit,,Features,Train_test_split,Size,maxlen,batch_size,epochs,type,lr,lstm_output_size,dense,dropout,embedding_size,pool_size,filters,kernel_size,AUC,Val acc,Model file,Comment
+Name,Purpose,Description,Run file,Commit,Features,Train_test_split,Size,maxlen,batch_size,epochs,type,lr,lstm_output_size,dense,dropout,embedding_size,pool_size,filters,kernel_size,AUC,Val acc,Model file,Comment
 CNN1D_LSTM_Big,Baseline CNN1D-LSTM Text only,Big model,jigsaw_simple_text_lstm_tokenizer.ipynb,-,comment_text,0.2,1804874,317,256,2,adam,default,1000,,,100,3,256,3,0.5,0.7,jigsaw_cnn_lstm_text_only.h5,Same as small. Couldnt overfitIssue in model type or input data.
 CNN1D_LSTM_Small,Small CNN1D-LSTM Text only,Small model,jigsaw_simple_text_lstm_tokenizer.ipynb,-,comment_text,0.2,1804874,317,256,2,adam,default,100,,,100,3,64,3,0.5,0.7,-,No overfit. Needs bigger model
 ,Small data CNN1D-LSTM Text only,Big model Small data,jigsaw_simple_text_lstm_tokenizer.ipynb,-,comment_text,0.2,20000,317,256,2,adam,default,1000,,,100,3,256,3,0.5,0.7,jigsaw_cnn_lstm_text_only.h5,"Also, loss not improving"

@@ -25,8 +25,9 @@ class Experiment:
 
         elif orig_df:
             self.from_df(orig_df)
-        else:
-            # No records exist
+
+        else: # No records exist
+
             self.df = pd.DataFrame()
             warnings.warn(UserWarning("No old experiments records given. It's OK if this is the first record or you will add later using from_csv or from_df. Otherwise, old records they will be overwritten"))
 
@@ -66,10 +67,6 @@ class Experiment:
         self.df = pd.concat([self.df, exp_df], axis=0, ignore_index=True, sort=False)
 
     def exp_to_df(self, meta_data, config, results, yaml_file):
-        assert meta_data != None, "Meta data must be given. At least the experiment name and purpose."
-        assert config != None, "No experiment configurations given."
-        assert results != None, "No experiment results given."
-
         if yaml_file:
             self.from_yaml(yaml_file)
 
@@ -95,15 +92,23 @@ class Experiment:
         :return:
         :rtype:
         """
-        self.df.to_csv(csv_file, index=False)
+        with open(csv_file, mode='w', newline='\n') as f:
+            self.df.to_csv(f, index=False, sep=",", line_terminator='\n', encoding='utf-8')
+        #self.df.to_csv(csv_file, index=False, line_terminator='\n')
 
     def from_yaml(self, yaml_file):
+        """
+        Convert yaml file into df
+        :param yaml_file:
+        :type yaml_file:
+        :return: experiment data frame
+        :rtype: DataFrame
+        """
         # TODO: load yaml configs
         pass
 
     def to_yaml(self, meta_data, config, results, yaml_file):
-        # Build the log experiment df
-        exp_df = self.exp_to_df(meta_data, config, results, yaml_file)
+        # Write yaml from experiment df
 
         # TODO: write yaml file with exp_df
 
