@@ -2,6 +2,7 @@ import unittest
 from unittest import TestCase
 from logger.experiment import Experiment
 import pandas as pd
+import yaml
 
 class TestExperiment(TestCase):
 
@@ -27,38 +28,111 @@ class TestExperiment(TestCase):
 
         assert old_df.equals(experiment.df)
 
-    def test__init_from_yaml(self):
-        """
-        Test init with old experiment from csv and logged one from yaml
-        :return: Expected to have internal df with the csv + yaml data
-        :rtype:
-        """
-        # TODO: when yaml is supported
-        '''
-        experiment = Experiment(csv_file='results_old.csv')
-
-        old_df = pd.read_csv('results_old.csv')
-
-        assert old_df.equals(experiment.df)
-        '''
-        self.fail()
-
-
-    def test__init_old_exp_incomplete_exp(self):
+    def test__init_old_exp_orig_df_incomplete_exp(self):
         """
         Test init with old csv experiment + logged experiment with missing info
         :return: Expected to have user warning + internal df is empty
         :rtype:
         """
-        self.fail()
 
-    def test__init_old_exp_complete_exp(self):
+        old_df = pd.read_csv('results_old.csv')
+        meta_df, config_df, results_df = self.df_to_exp_attribs(old_df)
+        exp_meta = meta_df.iloc[-1].to_dict()
+        exp_config = config_df.iloc[-1].to_dict()
+        exp_results = results_df.iloc[-1].to_dict()
+
+
+        experiment = Experiment(orig_df=old_df,
+                                meta_data=None,
+                                config=exp_config,
+                                results=exp_results)
+        self.assertFalse(experiment.df.empty)
+        self.assertTrue(old_df.equals(experiment.df))
+
+        experiment = Experiment(orig_df=old_df,
+                                meta_data=None,
+                                config=None,
+                                results=exp_results)
+        self.assertFalse(experiment.df.empty)
+        self.assertTrue(old_df.equals(experiment.df))
+
+
+        experiment = Experiment(orig_df=old_df,
+                                meta_data=None,
+                                config=exp_config,
+                                results=None)
+        self.assertFalse(experiment.df.empty)
+        self.assertTrue(old_df.equals(experiment.df))
+
+
+    def test__init_old_exp_orig_df_complete_exp(self):
         """
         Test init with old csv experiment + logged experiment
         :return: Expected internal df = old csv + logged data
         :rtype:
         """
-        self.fail()
+
+        old_df = pd.read_csv('results_old.csv')
+        meta_df, config_df, results_df = self.df_to_exp_attribs(old_df)
+        exp_meta = meta_df.iloc[-1].to_dict()
+        exp_config = config_df.iloc[-1].to_dict()
+        exp_results = results_df.iloc[-1].to_dict()
+
+
+        experiment = Experiment(orig_df=old_df,
+                                meta_data=exp_meta,
+                                config=exp_config, results=exp_results)
+        self.assertFalse(experiment.df.empty)
+        exp_df = pd.concat([pd.DataFrame([exp_meta]), pd.DataFrame([exp_config]), pd.DataFrame([exp_results])],
+                           axis=1)
+        df = pd.concat([old_df, exp_df], axis=0, ignore_index=True, sort=False)
+        self.assertTrue(df.equals(experiment.df))
+
+    def test__init_old_exp_orig_df(self):
+        """
+        Test init with old csv experiment + logged experiment
+        :return: Expected internal df = old csv + logged data
+        :rtype:
+        """
+
+        old_df = pd.read_csv('results_old.csv')
+
+
+        experiment = Experiment(orig_df=old_df)
+        self.assertFalse(experiment.df.empty)
+        self.assertTrue(old_df.equals(experiment.df))
+
+    def test__init_old_exp_new_yaml(self):
+        """
+        Test init with old csv experiment + logged experiment
+        :return: Expected internal df = old csv + logged data
+        :rtype:
+        """
+        experiment = Experiment(csv_file='results_old.csv', yaml_file='config.yml')
+        self.assertFalse(experiment.df.empty)
+
+
+        with open('config.yml', 'r') as f:
+            exp_df = pd.DataFrame(yaml.load(f), index=[0])
+
+        old_df = pd.read_csv('results_old.csv')
+        df = pd.concat([old_df, exp_df], axis=0, ignore_index=True, sort=False)
+        self.assertTrue(df.equals(experiment.df))
+
+    def test__init_no_old_exp_new_yaml(self):
+        """
+        Test init with old csv experiment + logged experiment
+        :return: Expected internal df = old csv + logged data
+        :rtype:
+        """
+        with self.assertWarns(UserWarning):
+            experiment = Experiment(yaml_file='config.yml')
+            self.assertFalse(experiment.df.empty)
+
+            with open('config.yml', 'r') as f:
+                exp_df = pd.DataFrame(yaml.load(f), index=[0])
+
+            self.assertTrue(exp_df.equals(experiment.df))
 
 
     def test__init_no_old_exp_incomplete_exp(self):
@@ -100,6 +174,8 @@ class TestExperiment(TestCase):
         with self.assertWarns(UserWarning):
             experiment = Experiment(meta_data=exp_meta, config=exp_config, results=exp_results)
             self.assertFalse(experiment.df.empty)
+            exp_df = pd.concat([pd.DataFrame([exp_meta]), pd.DataFrame([exp_config]), pd.DataFrame([exp_results])], axis=1)
+            self.assertTrue(exp_df.equals(experiment.df))
 
     def test_from_csv(self):
         """
@@ -161,6 +237,7 @@ class TestExperiment(TestCase):
 
         with self.assertWarns(UserWarning):
             experiment = Experiment()
+            self.assertTrue(experiment.df.empty)
             experiment.log_experiment(meta_data=exp_meta, config=exp_config, results=exp_results, yaml_file=None)
             self.assertFalse(experiment.df.empty)
             #exp_df = old_df.iloc[-1]#pd.concat([meta_df.iloc[-1], config_df.iloc[-1], exp_results], axis=1)
@@ -182,8 +259,33 @@ class TestExperiment(TestCase):
         :return: Expected to have internal df appending logged data every time
         :rtype:
         """
-        self.fail()
 
+        experiment = Experiment(csv_file='results_old.csv')
+        self.assertFalse(experiment.df.empty)
+        experiment.log_experiment(yaml_file='config.yml')
+
+        with open('config.yml', 'r') as f:
+            exp_df = pd.DataFrame(yaml.load(f), index=[0])
+
+        old_df = pd.read_csv('results_old.csv')
+        df = pd.concat([old_df, exp_df], axis=0, ignore_index=True, sort=False)
+        self.assertTrue(df.equals(experiment.df))
+
+    def test_no_prev_exp_log_experiment_yaml(self):
+        """
+        Test logging extra experiment(s) data from yaml
+        :return: Expected to have internal df appending logged data every time
+        :rtype:
+        """
+
+        experiment = Experiment()
+        self.assertTrue(experiment.df.empty)
+        experiment.log_experiment(yaml_file='config.yml')
+
+        with open('config.yml', 'r') as f:
+            exp_df = pd.DataFrame(yaml.load(f), index=[0])
+
+        self.assertTrue(exp_df.equals(experiment.df))
 
     def test_log_experiment_incomplete_attribs(self):
         """
@@ -286,7 +388,12 @@ class TestExperiment(TestCase):
         :return: Expected returned df to be the same as in yaml file
         :rtype: DataFrame
         """
-        self.fail()
+        experiment = Experiment()
+        exp_df = experiment.from_yaml('config.yml')
+        with open('config.yml', 'r') as f:
+            df = pd.DataFrame(yaml.load(f), index=[0])
+
+        self.assertTrue(df.equals(exp_df))
 
     def test_to_yaml(self):
         """
@@ -294,7 +401,26 @@ class TestExperiment(TestCase):
         :return: Expected to write yaml file with the same params in the experiment df's
         :rtype: yaml file written on desk
         """
-        self.fail()
+        experiment = Experiment(csv_file='results.csv')
+        self.assertFalse(experiment.df.empty)
+        experiment.log_experiment(yaml_file='config.yml')
+
+        with open('config.yml', 'r') as f:
+            in_config = pd.DataFrame(yaml.load(f), index=[0])
+
+
+        meta_df, config_df, results_df = self.df_to_exp_attribs(in_config)
+
+        #experiment.to_yaml(meta_df.iloc[-1].to_dict(), config_df.iloc[-1].to_dict(), results_df.iloc[-1].to_dict(), 'out_config.yml')
+        experiment.to_yaml(meta_df.iloc[-1].to_dict(), config_df.iloc[-1].to_dict(), results_df.iloc[-1].to_dict(),
+                           'out_config.yml')
+
+        with open('out_config.yml', 'r') as f:
+            out_config = pd.DataFrame(yaml.load(f), index=[0])
+            
+        self.assertTrue(in_config.equals(out_config))
+
+
 
     # Utils
     def df_to_exp_attribs(self, df):

@@ -1,5 +1,6 @@
 import pandas as pd
 import warnings
+import yaml
 class Experiment:
     # TODO: add **kwargs to support any experiment parameters other than the given ones. It should be a dict.
     def __init__(self, meta_data=None, config=None, results=None, csv_file=None, orig_df=None, yaml_file=None):
@@ -23,7 +24,7 @@ class Experiment:
         if csv_file:
             self.from_csv(csv_file)
 
-        elif orig_df:
+        elif orig_df is not None:
             self.from_df(orig_df)
 
         else: # No records exist
@@ -57,8 +58,7 @@ class Experiment:
     def from_df(self, old_df):
         self.df = old_df
 
-
-    def log_experiment(self, meta_data, config, results, yaml_file):
+    def log_experiment(self, meta_data=None, config=None, results=None, yaml_file=None):
 
         # Build the log experiment df
         exp_df = self.exp_to_df(meta_data, config, results, yaml_file)
@@ -66,9 +66,9 @@ class Experiment:
         # Append the current experiment to old records
         self.df = pd.concat([self.df, exp_df], axis=0, ignore_index=True, sort=False)
 
-    def exp_to_df(self, meta_data, config, results, yaml_file):
+    def exp_to_df(self, meta_data=None, config=None, results=None, yaml_file=None):
         if yaml_file:
-            self.from_yaml(yaml_file)
+            exp_df = self.from_yaml(yaml_file)
 
         else:
             # Load experiments data:
@@ -104,12 +104,28 @@ class Experiment:
         :return: experiment data frame
         :rtype: DataFrame
         """
-        # TODO: load yaml configs
-        pass
-
+        with open(yaml_file, 'r') as f:
+            exp_df = pd.DataFrame(yaml.load(f), index=[0])
+        return exp_df
     def to_yaml(self, meta_data, config, results, yaml_file):
-        # Write yaml from experiment df
+        """ Write yaml from experiment df
 
-        # TODO: write yaml file with exp_df
+        :param meta_data: exp_df meta
+        :type meta_data: DataFrame
+        :param config: exp_df config
+        :type config: DataFrame
+        :param results: exp_df results
+        :type results: DataFrame
+        :param yaml_file: the output file to save yaml (full path)
+        :type yaml_file: string
+        :return:
+        :rtype:
+        """
 
-        pass
+
+        exp_df = self.exp_to_df(meta_data, config, results, yaml_file=None)
+        with open(yaml_file, 'wt') as f:
+            yaml.dump(exp_df.iloc[-1].to_dict(), f, default_flow_style=False)
+
+        return exp_df
+
