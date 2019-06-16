@@ -5,7 +5,7 @@ from os.path import dirname
 sys.path.append(dirname('../../'))
 import unittest
 from unittest import TestCase
-from logger.experiments import Experiment
+from ml_logger.experiments import Experiment
 import pandas as pd
 import yaml
 
