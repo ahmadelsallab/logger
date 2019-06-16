@@ -7,11 +7,11 @@ with open('requirements.txt') as f:
 
 
 setup(
-   name='ml_logger',
+   name='ml-logger',
    version='1.0',
    description='Machine learning experiments logger',
    author='Ahmad El Sallab',
    author_email='ahmad.elsallab@gmail.com',
-   packages=[''],  #same as name
+   packages=['mllogger'],  #same as name
    install_requires=required, #external packages as dependencies
 )

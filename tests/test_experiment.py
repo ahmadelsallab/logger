@@ -2,10 +2,10 @@ import sys
 from os.path import dirname
 #sys.path.append(dirname(__file__))
 #sys.path.append(dirname('../experiments.py'))
-sys.path.append(dirname('../../'))
+sys.path.append(dirname('../'))
 import unittest
 from unittest import TestCase
-from ml_logger.experiments import Experiment
+from mllogger.experiments import Experiment
 import pandas as pd
 import yaml
 
