@@ -1,6 +1,11 @@
+import sys
+from os.path import dirname
+#sys.path.append(dirname(__file__))
+#sys.path.append(dirname('../experiments.py'))
+sys.path.append(dirname('../../'))
 import unittest
 from unittest import TestCase
-from logger.experiment import Experiment
+from logger.experiments import Experiment
 import pandas as pd
 import yaml
 
@@ -170,7 +175,9 @@ class TestExperiment(TestCase):
         exp_meta = meta_df.iloc[-1].to_dict()
         exp_config = config_df.iloc[-1].to_dict()
         exp_results = results_df.iloc[-1].to_dict()
-
+        
+        # Windows: Needs fix in unittest in File "/home/ahmad/anaconda3/lib/python3.6/unittest/case.py", line 230
+        # Change sys.modules.values() into sys.modules.copy().values()
         with self.assertWarns(UserWarning):
             experiment = Experiment(meta_data=exp_meta, config=exp_config, results=exp_results)
             self.assertFalse(experiment.df.empty)
