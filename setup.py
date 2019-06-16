@@ -12,6 +12,6 @@ setup(
    description='Machine learning experiments logger',
    author='Ahmad El Sallab',
    author_email='ahmad.elsallab@gmail.com',
-   packages=['experiments'],  #same as name
+   packages=[''],  #same as name
    install_requires=required, #external packages as dependencies
 )
