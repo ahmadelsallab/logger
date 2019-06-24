@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
 
 
 setup(
-   name='mllogger',
+   name='mlexperiments',
    version='1.0',
    description='Machine learning experiments logger',
    author='Ahmad El Sallab',
